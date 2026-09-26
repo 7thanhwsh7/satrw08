@@ -274,20 +274,29 @@
   /* ---------- START SCREEN ---------- */
   #startScreen{flex:1;display:flex;align-items:center;justify-content:center;padding:28px 20px;overflow:hidden;position:relative;
     background:#0c4f8a;
-    background-image:radial-gradient(circle at 8% 12%,rgba(255,255,255,.16) 0 1px,transparent 1.5px),
-      radial-gradient(circle at 84% 18%,rgba(255,255,255,.12) 0 1px,transparent 1.5px),
+    background-image:linear-gradient(rgba(255,255,255,.06) 1px,transparent 1px),
+      linear-gradient(90deg,rgba(255,255,255,.06) 1px,transparent 1px),
       linear-gradient(133deg,rgba(5,43,82,.58) 0 23%,transparent 23% 74%,rgba(255,255,255,.08) 74% 100%);
-    background-size:31px 31px,41px 41px,100% 100%;
+    background-size:32px 32px,32px 32px,100% 100%;
     animation:satDrift 28s linear infinite;}
   @keyframes satDrift{
     0%{background-position:0 0, 0 0, 0 0;}
-    100%{background-position:62px 34px, -82px 54px, 0 0;}
+    100%{background-position:32px 32px, 32px 32px, 0 0;}
   }
   @media (prefers-reduced-motion: reduce){ #startScreen{animation:none;} }
   .card{background:#fff;border:0;border-radius:4px;padding:0;max-width:460px;width:100%;text-align:center;
     overflow:hidden;box-shadow:0 20px 44px rgba(0,27,55,.34);}
-  .card::before{content:'SAT PRACTICE';display:block;background:#073b70;color:#fff;padding:11px 24px 10px;
-    font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:11px;font-weight:700;letter-spacing:1.8px;text-align:left;}
+  .card{position:relative;z-index:1;}
+  .card-head{display:flex;align-items:center;justify-content:space-between;background:#073b70;color:#fff;padding:11px 20px 10px 24px;
+    font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:11px;font-weight:800;letter-spacing:1.8px;text-align:left;}
+  .card-head .badge{background:#f9b233;color:#073b70;font-size:10.5px;font-weight:800;letter-spacing:.8px;padding:3px 8px;border-radius:3px;}
+  .card .name-hint{text-align:left;margin:-7px 30px 16px;font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:11.5px;line-height:1.5;color:#61758a;}
+  .card .name-hint b{color:#34495e;font-weight:700;}
+  .start-deco{position:absolute;color:rgba(255,255,255,.14);font-family:Georgia,'Times New Roman',serif;font-weight:700;
+    pointer-events:none;user-select:none;line-height:1;z-index:0;}
+  .start-deco svg{display:block;stroke:rgba(255,255,255,.2);fill:none;stroke-width:2;}
+  #nameInput{text-transform:uppercase;}
+  #nameInput::placeholder{text-transform:none;}
   .card .brand-logo{font-family:'Inter','Segoe UI',system-ui,sans-serif;font-weight:700;font-size:12.5px;letter-spacing:2px;color:#0c4f8a;margin:27px 30px 5px;}
   .card .brand-sub{font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:11.5px;font-weight:500;color:#61758a;margin:0 30px 22px;}
   .card h2{color:#14283d;margin:0 30px 7px;font-family:'Inter','Segoe UI',system-ui,sans-serif;font-size:26px;font-weight:800;line-height:1.15;letter-spacing:-.7px;}
@@ -409,13 +418,20 @@
 <body>
 
 <div id="startScreen">
+  <div class="start-deco" style="top:3%;left:9%;font-size:88px;">&amp;</div>
+  <div class="start-deco" style="top:7%;right:-6px;font-size:96px;">&para;</div>
+  <div class="start-deco" style="top:66%;left:6%;font-size:84px;">&ldquo;&rdquo;</div>
+  <div class="start-deco" style="bottom:-14px;left:42%;font-size:80px;font-style:italic;">Aa</div>
+  <div class="start-deco" style="bottom:-10px;right:3%;"><svg width="150" height="92" viewBox="0 0 150 92"><path d="M75 16 C58 6 30 4 6 8 V84 C30 80 58 82 75 92 C92 82 120 80 144 84 V8 C120 4 92 6 75 16 Z M75 16 V92"/><path d="M20 30 H58 M20 44 H58 M20 58 H50"/></svg></div>
   <div class="card">
+    <div class="card-head"><span>SAT PRACTICE</span><span class="badge">R&amp;W</span></div>
     <div class="brand-logo">G.EDU</div>
     <div class="brand-sub">G.EDU Language Center</div>
     <h2>SAT Reading &amp; Writing Practice</h2>
     <p style="color:var(--muted);font-size:13.5px;">Enter your name and class to begin.</p>
     <label for="nameInput">Full name</label>
-    <input type="text" id="nameInput" placeholder="Full name">
+    <input type="text" id="nameInput" placeholder="Full name" autocomplete="off" spellcheck="false">
+    <div class="name-hint">Your name will auto-format to <b>CAPITAL LETTERS</b>, no accents.<br>T&ecirc;n s&#7869; t&#7921; &#273;&#7897;ng chuy&#7875;n th&agrave;nh <b>IN HOA, KH&Ocirc;NG d&#7845;u</b>.</div>
     <label for="clsInput">Class</label>
     <input type="text" id="clsInput" placeholder="Class">
     <button class="navctl primary" style="width:100%;margin-top:6px;" onclick="startTest()">Start Test</button>
@@ -1848,7 +1864,30 @@ function submitReport(){
   alert("Thanks — your report has been sent.");
 }
 
+/* Tên học sinh: tự IN HOA, bỏ dấu tiếng Việt (đ/Đ -> D), gộp khoảng trắng. */
+function normalizeStudentName(s){
+  return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[đĐ]/g,'D').toUpperCase().replace(/\s+/g,' ');
+}
+(function(){
+  const el = document.getElementById('nameInput');
+  if(!el) return;
+  let composing = false;
+  const apply = () => {
+    const v = el.value, n = normalizeStudentName(v);
+    if(v === n) return;
+    const pos = el.selectionStart, diff = v.length - n.length;
+    el.value = n;
+    try{ const c = Math.max(0,(pos||n.length) - diff); el.setSelectionRange(c,c); }catch(e){}
+  };
+  el.addEventListener('compositionstart', ()=>{ composing = true; });
+  el.addEventListener('compositionend', ()=>{ composing = false; apply(); });
+  el.addEventListener('input', e => { if(!composing && !e.isComposing) apply(); });
+  el.addEventListener('blur', () => { el.value = normalizeStudentName(el.value).trim(); });
+})();
+
 function startTest(){
+  document.getElementById('nameInput').value = normalizeStudentName(document.getElementById('nameInput').value).trim();
   studentName = document.getElementById('nameInput').value.trim();
   studentClass = document.getElementById('clsInput').value.trim();
   if(!studentName){ alert("Please enter your name."); return; }
